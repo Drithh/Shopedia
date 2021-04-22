@@ -3,5 +3,8 @@
 
 int main() {
 	Store St;
-	St.print();
+	St.sort(1);
+	std::cout << "asdasdasda\n\n";
+
+
 }
