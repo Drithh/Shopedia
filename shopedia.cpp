@@ -3,6 +3,5 @@
 
 int main() {
 	Store St;
-	St.insert();
 	St.print();
 }

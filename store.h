@@ -1,20 +1,30 @@
 #pragma once
 #include <map>
 #include <iostream>
+#include <vector>
+#include <iomanip>
+#define NAMA_LENGTH 30
 
 struct Item {
-	char nama_barang[10];
+	char nama_barang[NAMA_LENGTH];
 	int harga;
 };
 
 class Store {
 private:
-	std::map <std::string, Item> category;
+	std::map <int, std::pair <std::string, std::vector <Item>>> category;
+	void defaultItem();
+
 public:
-	void insert() {
-		category.insert({ "Elektronik", {"RAM", 10} });
+	Store() {
+		defaultItem();
 	}
 	void print() {
-		std::cout << category["Elektronik"].harga;
+		auto item = category[0].second;
+		for (int i = 0; i < 10; ++i) {
+			auto nama_barang_temp = (item[i].nama_barang);
+			std::cout << nama_barang_temp << std::setw(NAMA_LENGTH - strlen(nama_barang_temp)) << item[i].harga << '\n';
+			
+		}
 	}
 };
