@@ -48,6 +48,9 @@ private:
 
 	void printItem(std::vector <Item>& item_list);
 
+	void cart();
+	void deletCartItem();
+
 	std::vector <Item> findItem();
 	std::vector <Item>* sortItem();
 	void footer();
@@ -55,54 +58,31 @@ private:
 public:
 	Store() { defaultItem(); }
 
-	void instruction() {
-		enum Hub
-		{
-			SortItem = -2,
-			FindItem,
-			Menu,
-		};
-		while (true)
-		{
-			if (!size_buffer) {
-				if (state == Menu) {
-					std::cout << "Selamat Datang Di Shopedia\n" <<
-						"Silakhan pilih menu yang ada dibawah\n";
-						for (int i = 0; i < 5; ++i) {
-							std::cout << (i + 1) << ". " << category[i].first << '\n';
-						}
-				}
-				else {
-					printItem(category[state-1].second);
-				}
-			}
-			else {
-				printItem(modified_vec);
-			}
+	void instruction();
 
-			footer();
-
-			int user_input = state == 0 && size_buffer == 0 ? intInput(-2, 5) : askToBuy(size_buffer ? size_buffer : category[state - 1].second.size());
-			if (state == 0 && size_buffer == 0 && user_input > 0) {
-				modified_vec = category[user_input - 1].second;
-				state = user_input;
-			}
-			size_buffer = 0;
-
-			switch (user_input)
-			{
-			case FindItem:
-				modified_vec  = findItem();
-				size_buffer = modified_vec.size();
-				break;
-			case SortItem:
-				modified_vec = *sortItem();
-				size_buffer = modified_vec.size();
-				break;
-			}
+	void addItem() {
+		std::cout << "\033[91m" << "Kategorinya apa?\n";
+		for (int i = 0; i < 5; ++i) {
+			std::cout << "\033[36m" << (i + 1) << ". " << category[i].first << '\n';
 		}
-
+		int input_category = intInput(1, 5);
+		std::string nama_barang;
+		while (true) {
+			std::cout << "\033[36m" << "Masukkan nama item (maks 40 karakter) : ";
+			std::cin.ignore();
+			std::getline(std::cin, nama_barang);
+			if(nama_barang.size() > 40 || nama_barang.size() < 1) {
+				std::cout << "\033[36m" << "Nama Barang Jelek\n";
+				nama_barang.clear();
+				continue;
+			}
+			break;
+		}
+		std::cout << "\033[36m" << "Berapa Harganya ? (dalam ribuan)\n";
+		int harga = intInput(1,INT_MAX);
+		category[input_category - 1].second.push_back({ nama_barang, harga });
 	}
+
 
 
 

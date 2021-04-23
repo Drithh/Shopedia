@@ -39,6 +39,7 @@ void Store::fullItem() {
 
 
 void Store::printItem(std::vector <Item>& item_list) {
+	std::cout << "\033[93m";
 	std::string metric = "KMBT";
 	for (int i = 0; i < item_list.size(); ++i) {
 		float harga = item_list[i].harga;
@@ -48,6 +49,7 @@ void Store::printItem(std::vector <Item>& item_list) {
 		}
 		std::cout << (i+1) << "." << std::setw(i < 9 ? 2 : i < 99 ? 1 : 0) << ' ' << item_list[i].nama_barang << std::setw(NAMA_LENGTH - item_list[i].nama_barang.size()) << harga << metric[j] << '\n';
 	}
+	std::cout << "\033[0m";
 }
 
 std::vector <Item> Store::findItem() {
@@ -55,14 +57,13 @@ std::vector <Item> Store::findItem() {
 	std::vector<Item>* v_find;
 	std::vector<Item> item_found;
 
-	std::cout << "Silahkan Masukkan Nama Barang yang dicari di " << (state == 0 ? "Menu" : category[state - 1].first) << " : ";
+	std::cout << "\033[96m" << "Silahkan Masukkan Nama Barang yang dicari di " << (state == 0 ? "Menu" : category[state - 1].first) << " : ";
 	std::cin >> needle;
 
 	fullItem();
-	auto vec_buffer = category[state - 1].second;
 
 	if (state == 0) v_find = &full_item;
-	else v_find = &vec_buffer;
+	else v_find = &category[state - 1].second;
 
 
 	for (int i = 0; i < v_find->size(); ++i) {
@@ -71,10 +72,8 @@ std::vector <Item> Store::findItem() {
 		}
 	}
 
-	if (!item_found.size()) std::cout << "Maaf Itemnya tidak ditemukan di kategori ini\n";
-	else {
-		return item_found;
-	}
+	if (item_found.size() == 0) std::cout << "\033[96m" << "Maaf Itemnya tidak ditemukan di kategori ini\n\n" << "\033[0m";
+	return item_found;
 }
 
 std::vector <Item>* Store::sortItem() {
@@ -85,12 +84,10 @@ std::vector <Item>* Store::sortItem() {
 	std::vector<Item>* v_sort;
 
 	fullItem();
-	auto vec_buffer = category[state - 1].second;
-
 	if (state == 0) v_sort = &full_item;
-	else v_sort = &vec_buffer;
+	else v_sort = &category[state - 1].second;
 
-	std::cout << "Silahkan Pilih\n1. Dari Yang Termurah\n2. Dari Yang Termahal\n";
+	std::cout << "\033[97m"  << "Silahkan Pilih\n1. Dari Yang Termurah\n2. Dari Yang Termahal\n" << "\033[0m";
 	switch ((intInput(1, 2) - 1))
 	{
 	case Ascending:
@@ -105,7 +102,7 @@ std::vector <Item>* Store::sortItem() {
 
 int Store::intInput(int min, int max) {
 	int input;
-	std::cout << "Silahkan masukan pilihan anda dari " << min << " sampai " << max << " : ";
+	std::cout << "\033[96m" << "Silahkan masukan pilihan anda dari " << min << " sampai " << max << " : ";
 		while (true) {
 			while (!(std::cin >> input)) {
 				std::cin.clear();
@@ -114,7 +111,7 @@ int Store::intInput(int min, int max) {
 			}
 			if (input < min || input > max) std::cout << "Inputnya Salah Coba Lagi : ";
 			else {
-				std::cout << "\n\n";
+				std::cout << "\n\n" << "\033[0m";
 				return input;
 			}
 		}
@@ -123,19 +120,125 @@ int Store::intInput(int min, int max) {
 
 void Store::footer() {
 	std::string kategori = state == 0 ? "Menu" : category[state - 1].first;
-	std::cout << "\n0.  Untuk Kembali Ke Menu \n" <<
+	std::cout << "\033[97m" << "\n0.  Untuk Kembali Ke Menu \n" <<
 		"-1. Untuk mencari item di kategori " + kategori + '\n' <<
-		"-2. Untuk melakukan pengurutan item di kategori " + kategori + '\n';
+		"-2. Untuk melakukan pengurutan item di kategori " + kategori + '\n' <<
+		"-4. Untuk melihat Keranjang belanjaan anda\n" << 
+		"-4. Untuk menambahkan item ke toko\n\n" << "\033[0m";
 }
 
 
 int Store::askToBuy(int max) {
-	std::cout << "\nMasukkan angka yang sesuai disebelah kiri nama barang jika kamu ingin membelinya\n";
-	int user_input = intInput(-2, max);
+	std::cout << "\033[96m" << "Masukkan angka yang disebelah kiri nama barang jika kamu ingin membelinya\n" << "\033[0m";
+	int user_input = intInput(-4, max);
 	user_input == 0 ? state = 0 : 0;
 	if (user_input > 0) {
-		std::cout << '\n' << modified_vec[user_input - 1].nama_barang;
+		std::cout << "\033[96m" << '\n' << modified_vec[user_input - 1].nama_barang;
 		std::cout << " Berhasil Ditambahkan Ke keranjang\n\n";
+		receipt.push_back(modified_vec[user_input - 1]);
 	}
 	return user_input;
+}
+
+void Store::cart() {
+	enum cart
+	{
+		Back,
+		DeleteCart,
+		Pay,
+	};
+	while (1) {
+		if (!receipt.size()) {
+			std::cout << "Keranjang Anda Masih Kosong\n\n\n";
+			return;
+		}
+		else printItem(receipt);
+		std::cout << "\033[97m" << "\n0. Untuk Kembali\n" <<
+			"1. Menghapus Item Dalam keranjang\n" <<
+			"2. Untuk Membayar\n\n\n" << "\033[0m";
+		switch (intInput(0, 2))
+		{
+		case Back:
+			return;
+			break;
+		case DeleteCart:
+			deletCartItem();
+			break;
+		case Pay:
+			std::cout << "Karena ini hanyalah toko Ghoib\n" <<
+				"Maka anda tidak perlu membayar, tetapi anda\n" <<
+				"juga tidak akan mendapat item yang anda pilih\n" <<
+				"Terimakasih telah berbelanja dengan kami :DDDDDDDDDD\n\n\n";
+			receipt.clear();
+			return;
+		}
+	}
+}
+
+void Store::deletCartItem() {
+	std::cout << "\033[96m" << "Apakah Anda Serius ingin menghapus barang dari keranjang ?\n0. Untuk Kembali\n" << "\033[0m";
+	int delete_item = intInput(0, receipt.size());
+	if (delete_item) {
+		std::cout << "\033[96m" << receipt[delete_item - 1].nama_barang << " berhasil dihapus dari keranjang\n\n\n" << "\033[0m";
+		receipt.erase(receipt.begin() + (delete_item - 1));
+	}
+}
+
+void Store::instruction() {
+	enum Hub
+	{
+		AddItem		= -4,
+		Cart,
+		SortItem,
+		FindItem,
+		Menu,
+	};
+	while (true)
+	{
+		if (!size_buffer) {
+			if (state == Menu) {
+				std::cout << "\033[91m" << "Selamat Datang Di Shopedia\n" <<
+					"Silakhan pilih menu yang ada dibawah\n" << "\033[0m";
+				for (int i = 0; i < 5; ++i) {
+					std::cout << "\033[36m" << (i + 1) << ". " << category[i].first << '\n';
+				}
+			}
+			else {
+				int empty_char = category[state - 1].first.size();
+				std::cout << "\033[36m" << std::setw((NAMA_LENGTH + 5) / 2) << "Kategori" << " " << category[state - 1].first << '\n';
+				printItem(category[state - 1].second);
+			}
+		}
+		else {
+			printItem(modified_vec);
+		}
+
+		footer();
+
+		int user_input = state == 0 && size_buffer == 0 ? intInput(-4, 5) : askToBuy(size_buffer ? size_buffer : category[state - 1].second.size());
+		if (state == 0 && size_buffer == 0 && user_input > 0) {
+			modified_vec = category[user_input - 1].second;
+			state = user_input;
+		}
+		size_buffer = 0;
+
+		switch (user_input)
+		{
+		case Cart:
+			cart();
+			break;
+		case FindItem:
+			modified_vec = findItem();
+			size_buffer = modified_vec.size();
+			break;
+		case SortItem:
+			modified_vec = *sortItem();
+			size_buffer = modified_vec.size();
+			break;
+		case AddItem:
+			addItem();
+			break;
+		}
+	}
+
 }
