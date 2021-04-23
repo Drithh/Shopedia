@@ -4,10 +4,16 @@
 #include <vector>
 #include <iomanip>
 #include <algorithm>
-#define NAMA_LENGTH 30
+#include <string>
+
+
+#define NAMA_LENGTH 50
+
+
+
 
 struct Item {
-	char nama_barang[NAMA_LENGTH];
+	std::string nama_barang;
 	int harga;
 };
 
@@ -25,42 +31,64 @@ struct more_than_key {
 	}
 };
 
+
 class Store {
 private:
 	std::map <int, std::pair <std::string, std::vector <Item>>> category;
+	std::vector <Item> full_item;
+	int state = 0;
+
 	void defaultItem();
+	void fullItem();
 
 public:
-	Store() {
-		defaultItem();
-	}
-	void printItem() {
-		for (int j = 0; j < 5; ++j) {
-			auto item = category[j].second;
-			for (int i = 0; i < 10; ++i) {
-				auto nama_barang_temp = (item[i].nama_barang);
-				std::cout << nama_barang_temp << std::setw(NAMA_LENGTH - strlen(nama_barang_temp)) << item[i].harga << '\n';
+	Store() { defaultItem(); }
+
+	void printItem(std::vector <Item>& item_list);
+
+	void findItem(std::string needle);
+	void sortItem(bool condition);
+
+	int intInput(int min, int max);
+	void footer();
+
+	void instruction() {
+		enum Hub
+		{
+			SortItem = -2,
+			FindItem,
+			Hub,
+		};
+		while (true)
+		{
+			if (state == 0) {
+				std::cout << "Selamat Datang Di Shopedia\n" <<
+					"Silakhan pilih menu yang ada dibawah\n";
+					for (int i = 0; i < 5; ++i) {
+						std::cout << (i + 1) << ". " << category[i].first << '\n';
+					}
+			}
+			else {
+				printItem(category[state].second);
+			}
+			footer();
+			state = intInput(-2, state == 0 ? 5 : category[state].second.size());
+			switch (state)
+			{
+			case FindItem: {
+
+			}break;
+			case SortItem: {
+
+			}break;
+			default: {
+
+			}break;
 			}
 		}
-	}
-	
-	void sort(bool condition) {
-		std::vector <Item> full_item;
-		int size = 0;
-		for (int i = 0; i < 5; ++i) {
-			size += category[0].second.size();
-		}
-		full_item.reserve(size);
-		for (int i = 0; i < 5; ++i) {
-			auto item = category[i].second;
-			full_item.insert(full_item.end(), item.begin(), item.end());
 
-		}
-		if (condition) {
-			std::sort(full_item.begin(), full_item.end(), less_than_key());
-		}
-		for (auto i : full_item) {
-			std::cout << i.nama_barang << std::setw(NAMA_LENGTH - strlen(i.nama_barang)) << i.harga << '\n';
-		}
 	}
+
+
+
 };
