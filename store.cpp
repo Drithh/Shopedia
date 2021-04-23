@@ -50,42 +50,92 @@ void Store::printItem(std::vector <Item>& item_list) {
 	}
 }
 
-void Store::findItem(std::string needle) {
+std::vector <Item> Store::findItem() {
+	std::string needle;
+	std::vector<Item>* v_find;
+	std::vector<Item> item_found;
+
+	std::cout << "Silahkan Masukkan Nama Barang yang dicari di " << (state == 0 ? "Menu" : category[state - 1].first) << " : ";
+	std::cin >> needle;
+
 	fullItem();
-	std::vector <Item> item_found;
-	for (int i = 0; i < full_item.size(); ++i) {
-		if (full_item[i].nama_barang.find(needle) != std::string::npos) {
-			item_found.push_back(full_item[i]);
+	auto vec_buffer = category[state - 1].second;
+
+	if (state == 0) v_find = &full_item;
+	else v_find = &vec_buffer;
+
+
+	for (int i = 0; i < v_find->size(); ++i) {
+		if (v_find->at(i).nama_barang.find(needle) != std::string::npos) {
+			item_found.push_back(v_find->at(i));
 		}
 	}
-	printItem(item_found);
+
+	if (!item_found.size()) std::cout << "Maaf Itemnya tidak ditemukan di kategori ini\n";
+	else {
+		return item_found;
+	}
 }
-void Store::sortItem(bool condition) {
+
+std::vector <Item>* Store::sortItem() {
+	enum Sort {
+		Ascending,
+		Descending,
+	};
+	std::vector<Item>* v_sort;
+
 	fullItem();
-	if (condition) std::sort(full_item.begin(), full_item.end(), more_than_key());
-	else std::sort(full_item.begin(), full_item.end(), less_than_key());
-	printItem(full_item);
+	auto vec_buffer = category[state - 1].second;
+
+	if (state == 0) v_sort = &full_item;
+	else v_sort = &vec_buffer;
+
+	std::cout << "Silahkan Pilih\n1. Dari Yang Termurah\n2. Dari Yang Termahal\n";
+	switch ((intInput(1, 2) - 1))
+	{
+	case Ascending:
+		std::sort(v_sort->begin(), v_sort->end(), less_than_key());
+		break;
+	case Descending:
+		std::sort(v_sort->begin(), v_sort->end(), more_than_key());
+		break;
+	}
+	return v_sort;
 }
 
 int Store::intInput(int min, int max) {
 	int input;
 	std::cout << "Silahkan masukan pilihan anda dari " << min << " sampai " << max << " : ";
-		std::cin >> input;
 		while (true) {
-			if (!std::cin) {
+			while (!(std::cin >> input)) {
 				std::cin.clear();
 				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 				std::cout << "Inputnya Salah Coba Lagi : ";
 			}
-			else if (input < min || input > max) std::cout << "Inputnya Salah Coba Lagi : ";
-			else return input;
+			if (input < min || input > max) std::cout << "Inputnya Salah Coba Lagi : ";
+			else {
+				std::cout << "\n\n";
+				return input;
+			}
 		}
 	} 
 
 
 void Store::footer() {
-	std::string kategori = state == 0 ? "Menu" : category[state].first;
+	std::string kategori = state == 0 ? "Menu" : category[state - 1].first;
 	std::cout << "\n0.  Untuk Kembali Ke Menu \n" <<
-		"-1. Untuk melakukan pencari item di kategori " + kategori + '\n' <<
+		"-1. Untuk mencari item di kategori " + kategori + '\n' <<
 		"-2. Untuk melakukan pengurutan item di kategori " + kategori + '\n';
+}
+
+
+int Store::askToBuy(int max) {
+	std::cout << "\nMasukkan angka yang sesuai disebelah kiri nama barang jika kamu ingin membelinya\n";
+	int user_input = intInput(-2, max);
+	user_input == 0 ? state = 0 : 0;
+	if (user_input > 0) {
+		std::cout << '\n' << modified_vec[user_input - 1].nama_barang;
+		std::cout << " Berhasil Ditambahkan Ke keranjang\n\n";
+	}
+	return user_input;
 }
