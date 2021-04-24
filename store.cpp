@@ -67,14 +67,14 @@ void Store::instruction() {
 			}
 		}
 		else {
-			printItem(modified_vec);
+			printItem(vec_item);
 		}
 
 		footer();
 
 		int user_input = state == 0 && size_buffer == 0 ? intInput(-4, 5) : askToBuy(size_buffer != 0 ? size_buffer : category[state - 1].second.size());
 		if (state == 0 && size_buffer == 0 && user_input > 0) {
-			modified_vec = category[user_input - 1].second;
+			vec_item = category[user_input - 1].second;
 			state = user_input;
 		}
 		size_buffer = 0;
@@ -85,12 +85,12 @@ void Store::instruction() {
 			cart();
 			break;
 		case FindItem:
-			modified_vec = findItem();
-			size_buffer = modified_vec.size();
+			vec_item = findItem();
+			size_buffer = vec_item.size();
 			break;
 		case SortItem:
-			modified_vec = *sortItem();
-			size_buffer = modified_vec.size();
+			vec_item = sortItem();
+			size_buffer = vec_item.size();
 			break;
 		case AddItem:
 			addItem();
@@ -135,14 +135,14 @@ void Store::defaultItem() {
 
 
 void Store::fullItem() {
-	full_item.clear();
+	vec_item.clear();
 	for (int i = 0; i < 5; ++i) {
-		full_item.insert(full_item.end(), category[i].second.begin(), category[i].second.end());
+		vec_item.insert(vec_item.end(), category[i].second.begin(), category[i].second.end());
 	}
 }
 
 
-auto Store::intInput(int min, int max) -> int {
+auto Store::intInput(const int min, const int max) -> int {
 	int input;
 	setColor(LightCyan);
 	std::cout << "Silahkan masukan pilihan anda dari " << min << " sampai " << max << " : ";
@@ -161,15 +161,15 @@ auto Store::intInput(int min, int max) -> int {
 }
 
 
-auto Store::askToBuy(int max) -> int {
+auto Store::askToBuy(const int max) -> int {
 	setColor(LightCyan);
 	std::cout << "Masukkan angka yang disebelah kiri nama barang jika kamu ingin membelinya\n";
 	int user_input = intInput(-4, max);
 	user_input == 0 ? state = 0 : 0;
 	if (user_input > 0) {
-		std::cout << '\n' << modified_vec[user_input - 1].nama_barang;
+		std::cout << '\n' << vec_item.at(user_input - 1).nama_barang;
 		std::cout << " Berhasil Ditambahkan Ke keranjang\n\n";
-		receipt.push_back(modified_vec[user_input - 1]);
+		receipt.push_back(vec_item.at(user_input - 1));
 	}
 	return user_input;
 }
@@ -243,7 +243,10 @@ void Store::cart() {
 
 void Store::deletCartItem() {
 	setColor(LightCyan);
-	std::cout << "Apakah Anda Serius ingin menghapus barang dari keranjang ?\n0. Untuk Kembali\n" ;
+	std::cout << "Apakah Anda Serius ingin menghapus barang dari keranjang ?\n";
+	setColor(White);
+	std::cout << "0. Untuk Kembali\n" ;
+	setColor(LightCyan);
 	int delete_item = intInput(0, receipt.size());
 	if ((bool)delete_item) {
 		std::cout << receipt[delete_item - 1].nama_barang << " berhasil dihapus dari keranjang\n\n\n";
@@ -291,7 +294,7 @@ auto Store::findItem() -> std::vector <Item> {
 
 	fullItem();
 
-	if (state == 0) { v_find = &full_item;
+	if (state == 0) { v_find = &vec_item;
 	} else { v_find = &category[state - 1].second;
 	}
 
@@ -307,16 +310,16 @@ auto Store::findItem() -> std::vector <Item> {
 }
 
 
-auto Store::sortItem() -> std::vector <Item>* {
+auto Store::sortItem() -> std::vector <Item> {
 	enum Sort {
 		Ascending,
 		Descending,
 	};
-	std::vector<Item>* v_sort;
+	std::vector<Item> v_sort;
 
 	fullItem();
-	if (state == 0) { v_sort = &full_item;
-	} else { v_sort = &category[state - 1].second;
+	if (state == 0) { v_sort = vec_item;
+	} else { v_sort = category[state - 1].second;
 }
 	setColor(White);
 
@@ -324,10 +327,10 @@ auto Store::sortItem() -> std::vector <Item>* {
 	switch ((intInput(1, 2) - 1))
 	{
 	case Ascending:
-		std::sort(v_sort->begin(), v_sort->end(), less_than_key());
+		std::sort(v_sort.begin(), v_sort.end(), less_than_key());
 		break;
 	case Descending:
-		std::sort(v_sort->begin(), v_sort->end(), more_than_key());
+		std::sort(v_sort.begin(), v_sort.end(), more_than_key());
 		break;
 	}
 	return v_sort;

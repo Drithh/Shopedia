@@ -32,12 +32,14 @@ struct more_than_key {
 class Store {
 private:
 	std::map <int, std::pair <std::string, std::vector <Item>>> category;
-	std::vector <Item> full_item;
-	std::vector <Item> modified_vec;
+
+	std::vector <Item> vec_item;
+
 	std::vector <Item> receipt;
 
 	int state = 0;
 	int size_buffer = 0;
+
 	void defaultItem();
 
 	void fullItem();
@@ -53,7 +55,7 @@ private:
 	void addItem();
 
 	auto findItem() -> std::vector <Item>;
-	auto sortItem() -> std::vector <Item>*;
+	auto sortItem() -> std::vector <Item>;
 
 	void footer();
 
@@ -61,6 +63,5 @@ public:
 	Store() { defaultItem(); }
 
 	void instruction();
-
 
 };
