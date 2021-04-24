@@ -1,4 +1,3 @@
-#pragma once
 #include <map>
 #include <iostream>
 #include <vector>
@@ -7,7 +6,7 @@
 #include <string>
 
 
-#define NAMA_LENGTH 50
+#define ITEM_LENGTH 50
 
 
 struct Item {
@@ -46,6 +45,7 @@ private:
 	static auto intInput(int min, int max) -> int;
 	auto askToBuy(int max) -> int;
 
+	static void setColor(int forg_col);
 	static void printItem(std::vector <Item>& item_list);
 
 	void cart();
